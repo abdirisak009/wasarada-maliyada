@@ -30,6 +30,7 @@
       </div>
 
       <!-- Modal Form -->
+      <!-- Modal Form -->
       <template x-if="showModal">
         <div
           class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
@@ -69,9 +70,10 @@
                 class="border p-2 rounded w-full"
               />
               <input
-                id="formDate"
+                id="formExpiryDate"
                 type="date"
                 class="border p-2 rounded w-full"
+                placeholder="Expiry Date"
               />
             </div>
             <div class="flex justify-between items-center mt-6">
@@ -102,8 +104,8 @@
               <th class="p-2 border">Name</th>
               <th class="p-2 border">Certificate #</th>
               <th class="p-2 border">Date</th>
+              <th class="p-2 border">Expiry Date</th>
               <th class="p-2 border">Action</th>
-              <th class="p-2 border">Stutus</th>
             </tr>
           </thead>
           <tbody id="certTable"></tbody>
