@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Certificate Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 py-10">
+    <!-- Input -->
+    <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
+      <h2 class="text-lg font-bold mb-4 text-center">Enter TIN Number</h2>
+      <div class="space-y-4">
+        <input
+          id="tin"
+          type="text"
+          placeholder="Enter TIN Number"
+          class="w-full border p-2 rounded text-center font-semibold"
+        />
+        <button
+          onclick="lookupTIN()"
+          class="bg-blue-600 text-white px-4 py-2 rounded w-full font-semibold"
+        >
+          Generate Certificate
+        </button>
+        <p id="error" class="text-red-600 text-center hidden">
+          TIN Number not found in system.
+        </p>
+      </div>
+    </div>
+
+    <!-- Hidden Certificate (for preview & download only) -->
+    <div id="certificateBox" class="hidden">
+      <div
+        id="certificateContent"
+        class="p-10 bg-white w-[794px] mx-auto text-sm leading-relaxed"
+      >
+        <div class="text-center border-b pb-4">
+          <p>Dowlad Goboleedka Hirshabeelle ee Somalia</p>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Coat_of_arms_of_Somalia.svg/1200px-Coat_of_arms_of_Somalia.svg.png"
+            alt="Logo"
+            class="h-16 mx-auto my-2"
+          />
+          <p>Hirshabelle State of Somalia</p>
+          <h2 class="text-xl font-bold mt-4 underline">
+            TAX COMPLIANCE CERTIFICATE
+          </h2>
+        </div>
+        <div class="mt-6 grid grid-cols-2 gap-4">
+          <div><strong>TIN:</strong> <span id="tinOut"></span></div>
+          <div>
+            <strong>Certificate Number:</strong> <span id="certNoOut"></span>
+          </div>
+          <div><strong>Name:</strong> <span id="nameOut"></span></div>
+          <div>
+            <strong>Certificate Date:</strong> <span id="dateOut"></span>
+          </div>
+          <div><strong>Address:</strong> <span id="addressOut"></span></div>
+        </div>
+        <div class="mt-8 text-justify">
+          <p>
+            This is to certify that
+            <strong><span id="nameText"></span></strong>, TIN number
+            <span id="tinText"></span>, has been registered for taxation. Based
+            on information and paid tax records provided, the Tax Authority
+            hereby issues this certificate valid until
+            <strong>31st Sep, 2025</strong>.
+          </p>
+          <p class="mt-4">
+            This certificate is issued on the basis of information available to
+            the RCA at the certificate issue date. RCA assumes no legal
+            liability for the certificate nor for the correctness of information
+            materially altered after the date of its delivery.
+          </p>
+        </div>
+        <div class="mt-10 flex justify-between items-center">
+          <div>
+            <p>Director of Compliance</p>
+            <div class="w-32 h-16 border-b border-gray-600 mt-4"></div>
+          </div>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Somali_Republic_Seal.svg/1024px-Somali_Republic_Seal.svg.png"
+            alt="Stamp"
+            class="h-24 opacity-50"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Buttons -->
+    <div
+      id="popup"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-lg p-6 w-full max-w-md text-center">
+        <h3 class="text-xl font-bold mb-4">🎉 Hambalyo!</h3>
+        <p class="mb-6">Certificate-kii TIN Number-ka waa la sameeyay!</p>
+        <div class="flex justify-center gap-4">
+          <button
+            onclick="showPreview()"
+            class="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Preview
+          </button>
+          <button
+            onclick="downloadPDF()"
+            class="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div
+      id="previewModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-white p-4 rounded shadow-xl max-h-[90vh] overflow-y-auto w-[820px]"
+      >
+        <div class="flex justify-between mb-4">
+          <h3 class="text-lg font-semibold">Certificate Preview</h3>
+          <button onclick="closePreview()" class="text-red-600 font-bold">
+            &times;
+          </button>
+        </div>
+        <div id="previewContent"></div>
+      </div>
+    </div>
+
+    <script>
+      const certificates = {
+        746: {
+          name: "SARAN GENERAL SERVICE CO.",
+          tin: "746",
+          certNo: "240100123",
+          date: "31-Mar-2025",
+          address: "Mogadishu, Somalia",
+        },
+        888: {
+          name: "HIIRAAN LOGISTICS",
+          tin: "888",
+          certNo: "240100888",
+          date: "1-Apr-2025",
+          address: "Beledweyne, Somalia",
+        },
+      };
+
+      function lookupTIN() {
+        const tin = document.getElementById("tin").value.trim();
+        const cert = certificates[tin];
+        const error = document.getElementById("error");
+
+        if (cert) {
+          document.getElementById("tinOut").textContent = cert.tin;
+          document.getElementById("certNoOut").textContent = cert.certNo;
+          document.getElementById("nameOut").textContent = cert.name;
+          document.getElementById("dateOut").textContent = cert.date;
+          document.getElementById("addressOut").textContent = cert.address;
+          document.getElementById("tinText").textContent = cert.tin;
+          document.getElementById("nameText").textContent = cert.name;
+
+          error.classList.add("hidden");
+          document.getElementById("popup").classList.remove("hidden");
+        } else {
+          error.classList.remove("hidden");
+          document.getElementById("popup").classList.add("hidden");
+        }
+      }
+
+      function showPreview() {
+        const content = document
+          .getElementById("certificateContent")
+          .cloneNode(true);
+        const preview = document.getElementById("previewContent");
+        preview.innerHTML = "";
+        preview.appendChild(content);
+        document.getElementById("previewModal").classList.remove("hidden");
+        document.getElementById("popup").classList.add("hidden");
+      }
+
+      function closePreview() {
+        document.getElementById("previewModal").classList.add("hidden");
+      }
+
+      function downloadPDF() {
+        const element = document.getElementById("certificateContent");
+        html2pdf()
+          .set({
+            margin: 1,
+            filename: "certificate.pdf",
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+          })
+          .from(element)
+          .save();
+
+        document.getElementById("popup").classList.add("hidden");
+      }
+    </script>
+  </body>
+</html>
