@@ -3,58 +3,121 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Certificate Generator</title>
+    <title>Certificate System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"
+      defer
+    ></script>
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
   </head>
+  <style>
+    .card {
+      transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+  </style>
   <body
-    class="min-h-screen bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center px-4"
+    class="bg-gradient-to-b from-blue-600 to-white min-h-screen flex items-center justify-center font-[Inter]"
   >
     <div
-      class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 relative overflow-hidden transform transition-all hover:scale-105 duration-300 card"
+      class="card w-full max-w-md bg-white rounded-2xl shadow-lg p-8 text-center"
     >
-      <!-- LOGO AREA -->
-      <div class="absolute top-4 left-1/2 transform -translate-x-1/2">
-        <!-- Add your logo here -->
-        <img
-          src="/images/img.png"
-          alt="Logo"
-          class="w-20 h-20 rounded-full shadow-md border-2 border-white bg-gray-100 object-cover"
-        />
-      </div>
+      <img
+        src="images/img.png"
+        alt="Logo"
+        class="h-20 mx-auto rounded-full shadow mb-4"
+      />
+      <h1 class="text-2xl font-extrabold text-gray-900 mb-2">
+        Wasarada Maliyada Hirshabelle
+      </h1>
+      <p class="text-gray-700 mb-6">
+        Si fudud Ku hel shahaadada Canshuur<br />
+        bixiyaasha (TCC)
+      </p>
+      <input
+        id="tin"
+        type="text"
+        placeholder="Enter TIN Number"
+        class="w-full border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 rounded-lg p-3 text-center"
+      />
+      <button
+        onclick="lookupTIN()"
+        class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md transition duration-300"
+      >
+        Generate Certificate
+      </button>
+      <p id="error" class="text-red-600 text-sm mt-3 hidden">
+        TIN Number not found in system.
+      </p>
+    </div>
 
-      <div class="mt-24 text-center">
-        <h2 class="text-2xl font-extrabold text-gray-800 mb-4">
-          Wasarada Maliyada Hirshabelle
-        </h2>
-        <p class="mb-5">
-          Si fudud Ku hel shahaadada Canshuur <br />bixiyaasha (TCC)
+    <!-- Popup -->
+    <div
+      id="popup"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-lg p-6 w-full max-w-md text-center">
+        <h3 class="text-xl font-bold mb-4">🎉 Hambalyo!</h3>
+        <p class="mb-6">Certificate-kii TIN Number-ka waa la sameeyay!</p>
+        <p id="contactMsg" class="text-red-600 font-semibold mb-4 hidden">
+          Fadlan la xiriir xafiiska kuugu dhaw ama wac +252 61 5658846
         </p>
-
-        <input
-          id="tin"
-          type="text"
-          placeholder="Enter TIN Number"
-          class="w-full border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 rounded-lg p-3 text-center font-medium text-gray-700 transition"
-        />
-
-        <button
-          onclick="lookupTIN()"
-          class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow transition"
+        <div id="downloadButtons" class="flex justify-center gap-4">
+          <button
+            id="previewBtn"
+            onclick="showPreview()"
+            class="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Preview
+          </button>
+          <button
+            id="downloadBtn"
+            onclick="downloadPDF()"
+            class="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Download PDF
+          </button>
+        </div>
+        <p
+          id="expiredDownloadMsg"
+          class="text-red-600 font-semibold mt-4 hidden"
         >
-          Generate Certificate
-        </button>
-
-        <p id="error" class="text-red-600 text-sm mt-3 hidden">
-          TIN Number not found in system.
+          ⚠️ Shahaadadan waa dhacday — lama soo dagsan karo.
         </p>
       </div>
     </div>
 
-    <!-- Hidden Certificate (for preview & download only) -->
+    <!-- Certificate Preview Modal -->
+    <div
+      id="previewModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-white p-4 rounded shadow-xl max-h-[90vh] overflow-y-auto w-[820px]"
+      >
+        <div class="flex justify-between mb-4">
+          <h3 class="text-lg font-semibold">Certificate Preview</h3>
+          <button onclick="closePreview()" class="text-red-600 font-bold">
+            &times;
+          </button>
+        </div>
+        <div id="previewContent"></div>
+      </div>
+    </div>
+
+    <!-- Certificate HTML -->
     <div id="certificateBox" class="hidden">
       <div
         id="certificateContent"
@@ -82,80 +145,25 @@
             <strong>Certificate Date:</strong> <span id="dateOut"></span>
           </div>
           <div><strong>Address:</strong> <span id="addressOut"></span></div>
+          <div><strong>Valid Until:</strong> <span id="expiryOut"></span></div>
         </div>
         <div class="mt-8 text-justify">
           <p>
             This is to certify that
             <strong><span id="nameText"></span></strong>, TIN number
-            <span id="tinText"></span>, has been registered for taxation. Based
-            on information and paid tax records provided, the Tax Authority
-            hereby issues this certificate valid until
-            <strong>31st Sep, 2025</strong>.
+            <span id="tinText"></span>, has been registered for taxation. This
+            certificate is valid until
+            <strong><span id="expiryOut"></span></strong>.
           </p>
-          <p class="mt-4">
-            This certificate is issued on the basis of information available to
-            the RCA at the certificate issue date. RCA assumes no legal
-            liability for the certificate nor for the correctness of information
-            materially altered after the date of its delivery.
+          <p
+            id="expiredNote"
+            class="mt-6 text-center text-red-600 font-semibold hidden"
+          >
+            ⚠️ Shahaadadan waa dhacday.
           </p>
         </div>
-        <div class="mt-10 flex justify-between items-center">
-          <div>
-            <p>Director of Compliance</p>
-            <div class="w-32 h-16 border-b border-gray-600 mt-4"></div>
-          </div>
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Somali_Republic_Seal.svg/1024px-Somali_Republic_Seal.svg.png"
-            alt="Stamp"
-            class="h-24 opacity-50"
-          />
-        </div>
       </div>
     </div>
-
-    <!-- Modal Buttons -->
-    <div
-      id="popup"
-      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
-      <div class="bg-white rounded-lg p-6 w-full max-w-md text-center">
-        <h3 class="text-xl font-bold mb-4">🎉 Hambalyo!</h3>
-        <p class="mb-6">Certificate-kii TIN Number-ka waa la sameeyay!</p>
-        <div class="flex justify-center gap-4">
-          <button
-            onclick="showPreview()"
-            class="bg-green-600 text-white px-4 py-2 rounded"
-          >
-            Preview
-          </button>
-          <button
-            onclick="downloadPDF()"
-            class="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Download PDF
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Preview Modal -->
-    <div
-      id="previewModal"
-      class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
-    >
-      <div
-        class="bg-white p-4 rounded shadow-xl max-h-[90vh] overflow-y-auto w-[820px]"
-      >
-        <div class="flex justify-between mb-4">
-          <h3 class="text-lg font-semibold">Certificate Preview</h3>
-          <button onclick="closePreview()" class="text-red-600 font-bold">
-            &times;
-          </button>
-        </div>
-        <div id="previewContent"></div>
-      </div>
-    </div>
-
     <script src="main.js"></script>
   </body>
 </html>
